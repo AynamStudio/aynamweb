@@ -23,10 +23,9 @@ Login at `/login`; the app redirects there automatically on 401.
 | Framework | Next.js |
 | Build / output | defaults |
 | Env | `NEXT_PUBLIC_API_URL=https://api.aynam.in` |
-
 Deploy on a subdomain of the main site (e.g. `crm.aynam.in`) so the backend
 session cookie (domain `.aynam.in`, SameSite=Lax) is same-site for the
-browser. Add both frontend origins to the backend's `CORS_ORIGINS`.
+browser. Add both frontend origins to the backends `CORS_ORIGINS`.
 
 ## Theming
 

@@ -10,7 +10,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aynam.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aynam.in"),
   title: {
     default: "AYNAM — Ideas to Impact. Through Better Software.",
     template: "%s — AYNAM",

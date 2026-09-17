@@ -1,161 +1,277 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { api, timeAgo } from "./ui";
 
-type Me = { id: string; name: string; email: string; role: string; permissions: string[] };
-type Notif = { id: string; type: string; title: string; message: string; read: boolean; createdAt: string };
+type Me = { id: string; name: string; email: string; role: string; department?: string; permissions: string[] };
+type Notif = { id: string; type: string; title: string; message?: string; read: boolean; createdAt: string };
 
-const NAV = [
-  { href: "/dashboard", label: "Dashboard", perm: "leads.view" },
-  { href: "/leads", label: "Leads", perm: "leads.view" },
-  { href: "/employees", label: "Employees", perm: "employees.view" },
-  { href: "/imports", label: "Imports", perm: "leads.import" },
-  { href: "/templates", label: "Templates", perm: "templates.view" },
+const NAV: ReadonlyArray<{ href: string; label: string; perm: string; dot?: string }> = [
+  { href: "/dashboard",   label: "Dashboard",   perm: "leads.view",               dot: "var(--blue)" },
+  { href: "/leads",       label: "Leads",       perm: "leads.view" },
+  { href: "/employees",   label: "Employees",   perm: "employees.view" },
+  { href: "/imports",     label: "Imports",     perm: "leads.import" },
+  { href: "/templates",   label: "Templates",   perm: "leads.email.templates.view" },
   { href: "/automations", label: "Automations", perm: "automations.view" },
-  { href: "/activities", label: "Activities", perm: "activity.view" },
-  { href: "/settings", label: "Settings", perm: "settings.view" },
+  { href: "/activities",  label: "Activities",  perm: "activities.view" },
+  { href: "/settings",    label: "Settings",    perm: "settings.view" },
 ];
+
+const INITIALS = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
-  const [dark, setDark] = useState(false);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [bellOpen, setBellOpen] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    setDark(localStorage.getItem("aynam-admin-theme") === "dark");
     api<{ data: Me }>("/api/auth/me").then(({ data, status }) => {
-      if (status === 401) location.href = "/login";
+      if (status === 401) window.location.replace("/login");
       else if (data) setMe(data.data);
     });
   }, []);
-  useEffect(() => {
-    localStorage.setItem("aynam-admin-theme", dark ? "dark" : "light");
-  }, [dark]);
+
+  useEffect(() => { setBellOpen(false); setMobileNav(false); }, [pathname]);
+
   useEffect(() => {
     if (!me) return;
     const load = () =>
-      api<{ data: { items: Notif[] } }>("/api/notifications").then(({ data }) => data && setNotifs(data.data.items));
+      api<{ data: { items: Notif[] } }>("/api/notifications").then(({ data }) =>
+        data ? setNotifs(data.data.items) : null
+      );
     load();
-    const t = setInterval(load, 60000);
+    const t = setInterval(load, 45000);
     return () => clearInterval(t);
   }, [me]);
 
   const unread = notifs.filter((n) => !n.read).length;
   const links = NAV.filter((n) => me && (me.role === "ADMIN" || me.permissions.includes(n.perm)));
+  const currentLabel = NAV.find((n) => pathname.startsWith(n.href))?.label || "Dashboard";
 
   const logout = async () => {
     await api("/api/auth/logout", { method: "POST" });
-    location.href = "/login";
+    window.location.replace("/login");
   };
 
   return (
-    <div className={cn("min-h-screen", dark ? "s-dark" : "s-light")}>
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
-        {/* sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-linesoft px-5 py-7 lg:flex">
-          <Link href="/dashboard" className="headline text-lg tracking-[0.3em] text-fog">AYNAM</Link>
-          <span className="label-tech mt-1 text-fog-muted">Internal System</span>
-          <nav className="mt-10 flex flex-col gap-1">
-            {links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm transition-colors duration-200",
-                  pathname.startsWith(l.href) ? "bg-fg/10 font-medium text-fog" : "text-fog-dim hover:bg-fg/5 hover:text-fog"
-                )}
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="mt-auto border-t border-linesoft pt-4">
-            <p className="text-xs text-fog">{me?.name}</p>
-            <p className="mt-0.5 text-[11px] text-fog-muted">{me?.role}</p>
-            <button onClick={logout} className="label-tech mt-3 text-fog-muted transition-colors hover:text-fog">Logout →</button>
-          </div>
-        </aside>
+    <div className="app-shell">
+      {/* ================== SIDEBAR ================== */}
+      <aside className="sidebar">
+        <Link href="/dashboard" className="aynam-logo mx-auto" style={{ height: 40, width: 180 }}>
+          <Image src="/brand/logo.png" alt="AYNAM" fill sizes="180px" priority quality={95} />
+        </Link>
 
-        {/* main */}
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-linesoft bg-inherit px-5 py-3.5 backdrop-blur lg:px-9">
-            <div className="flex items-center gap-4 overflow-x-auto">
-              <Link href="/dashboard" className="headline shrink-0 text-base tracking-[0.3em] text-fog lg:hidden">AYNAM</Link>
-              <nav className="flex items-center gap-1 overflow-x-auto lg:hidden">
+        <Link
+          href="/leads"
+          className="btn btn-primary"
+          style={{ margin: "4px 4px 0" }}
+        >
+          + New Lead
+        </Link>
+
+        <nav className="mt-4 flex flex-col gap-1 px-1">
+          <span className="label-tech px-3 pb-2" style={{ marginTop: 8 }}>Workspace</span>
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="nav-item"
+              data-active={pathname.startsWith(l.href) ? "true" : "false"}
+            >
+              <span className="nav-dot" style={l.dot ? { background: l.dot } : undefined} />
+              <span>{l.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-auto px-1">
+          <a
+            href="https://aynam.in"
+            target="_blank"
+            rel="noreferrer"
+            className="nav-item text-xs"
+            style={{ color: "var(--text-3)" }}
+          >
+            <span className="nav-dot" style={{ background: "var(--text-3)" }} />
+            aynam.in ↗
+          </a>
+          <div
+            className="mt-3 flex items-center gap-3 rounded-lg px-3 py-3"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          >
+            <div className="avatar">{me ? INITIALS(me.name) : ".."}</div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{me?.name || "Loading…"}</p>
+              <p className="truncate text-[11px] text-muted">
+                {me?.role}
+                {me?.department ? ` · ${me.department}` : ""}
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              title="Logout"
+              className="rounded-md px-2 py-1 text-xs text-dim transition-colors hover:text-white"
+              aria-label="Logout"
+            >
+              ⎋
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ================== MAIN ================== */}
+      <div className="main-col">
+        {/* Topbar */}
+        <header className="topbar">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMobileNav(true)}
+              aria-label="Open menu"
+              className="btn btn-ghost h-9 w-9 p-0 lg:hidden"
+            >
+              ☰
+            </button>
+            <Link href="/dashboard" className="aynam-logo lg:hidden" style={{ height: 28, width: 120 }}>
+              <Image src="/brand/logo.png" alt="AYNAM" fill sizes="120px" quality={95} />
+            </Link>
+            <div className="hidden lg:block">
+              <div className="label-tech">{currentLabel}</div>
+              <div className="text-xs text-dim mt-0.5">
+                Welcome back{me?.name ? `, ${me.name.split(" ")[0]}` : ""}.
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="search"
+              placeholder="Search…"
+              className="input hidden h-9 w-56 md:block"
+              style={{ padding: "0 14px" }}
+            />
+
+            <button
+              onClick={() => setBellOpen((v) => !v)}
+              aria-label="Notifications"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg border transition-colors"
+              style={{
+                borderColor: "var(--border)",
+                background: "var(--surface)",
+                color: "var(--text-2)",
+              }}
+            >
+              <span aria-hidden>◔</span>
+              {unread > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold"
+                  style={{ background: "var(--blue)", color: "#fff" }}
+                >
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              )}
+            </button>
+
+            {bellOpen && (
+              <div
+                className="absolute right-6 top-14 z-50 w-80 overflow-hidden"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                }}
+              >
+                <div
+                  className="flex items-center justify-between px-4 py-3"
+                  style={{ borderBottom: "1px solid var(--border)" }}
+                >
+                  <span className="label-tech">Notifications</span>
+                  <span className="text-[10px] text-muted">{unread} unread</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifs.length === 0 && (
+                    <div className="px-4 py-10 text-center text-sm text-muted">All clear.</div>
+                  )}
+                  {notifs.map((n) => (
+                    <button
+                      key={n.id}
+                      onClick={async () => {
+                        await api(`/api/notifications/${n.id}/read`, { method: "PATCH" });
+                        setNotifs((v) => v.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+                      }}
+                      className="block w-full px-4 py-3 text-left transition-colors hover:bg-white/5"
+                      style={{ borderBottom: "1px solid var(--border)" }}
+                    >
+                      <p className="text-sm font-medium">{n.title}</p>
+                      {n.message && <p className="mt-0.5 text-xs text-dim line-clamp-2">{n.message}</p>}
+                      <p className="mt-1 text-[10px] uppercase tracking-wider text-muted">
+                        {timeAgo(n.createdAt)}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="avatar">{me ? INITIALS(me.name) : ".."}</div>
+          </div>
+        </header>
+
+        {/* Mobile drawer */}
+        {mobileNav && (
+          <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMobileNav(false)}>
+            <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.7)" }} />
+            <aside
+              className="absolute left-0 top-0 h-full w-72 p-5"
+              style={{ background: "var(--surface)", borderRight: "1px solid var(--border)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="aynam-logo" style={{ height: 36, width: 160 }}>
+                <Image src="/brand/logo.png" alt="AYNAM" fill sizes="160px" quality={95} />
+              </div>
+              <nav className="mt-8 flex flex-col gap-1">
                 {links.map((l) => (
                   <Link
                     key={l.href}
                     href={l.href}
-                    className={cn(
-                      "whitespace-nowrap rounded-full px-3 py-1.5 text-xs transition-colors",
-                      pathname.startsWith(l.href) ? "bg-fg/10 font-medium text-fog" : "text-fog-dim"
-                    )}
+                    className="nav-item"
+                    data-active={pathname.startsWith(l.href) ? "true" : "false"}
                   >
-                    {l.label}
+                    <span className="nav-dot" />
+                    <span>{l.label}</span>
                   </Link>
                 ))}
               </nav>
-              <span className="label-tech hidden text-fog-muted lg:block">
-                {NAV.find((n) => pathname.startsWith(n.href))?.label || "Dashboard"}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <button
-                  onClick={() => setBellOpen((v) => !v)}
-                  aria-label="Notifications"
-                  className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line text-fog-dim transition-colors hover:text-fog"
-                >
-                  ◔
-                  {unread > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[9px] font-bold text-ink-950">
-                      {unread}
-                    </span>
-                  )}
-                </button>
-                {bellOpen && (
-                  <div className="absolute right-0 top-11 z-50 w-80 rounded-lg border border-line bg-card shadow-xl">
-                    <div className="border-b border-linesoft px-4 py-3">
-                      <span className="label-tech text-fog">Notifications</span>
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifs.length === 0 && <p className="px-4 py-6 text-sm text-fog-muted">Nothing yet.</p>}
-                      {notifs.map((n) => (
-                        <button
-                          key={n.id}
-                          onClick={async () => {
-                            await api(`/api/notifications/${n.id}/read`, { method: "PATCH" });
-                            setNotifs((v) => v.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
-                          }}
-                          className={cn("block w-full border-b border-linesoft px-4 py-3 text-left transition-colors hover:bg-fg/5", !n.read && "bg-fg/[0.04]")}
-                        >
-                          <p className="text-sm text-fog">{n.title}</p>
-                          {n.message && <p className="mt-0.5 text-xs text-fog-dim">{n.message}</p>}
-                          <p className="mt-1 text-[10px] text-fog-muted">{timeAgo(n.createdAt)}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={() => setDark((v) => !v)}
-                aria-label="Toggle theme"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-fog-dim transition-colors hover:text-fog"
-              >
-                {dark ? "○" : "●"}
-              </button>
-              <span className="label-tech hidden text-fog-muted md:block">{me?.name}</span>
-            </div>
-          </header>
-          <main className="px-5 py-8 lg:px-9 lg:py-10">{children}</main>
-        </div>
+              <button onClick={logout} className="btn btn-ghost mt-8 w-full">Logout →</button>
+            </aside>
+          </div>
+        )}
+
+        {/* Page */}
+        <main className="page fade-in">{children}</main>
+
+        <footer
+          className="flex flex-wrap items-center justify-between gap-3 px-7 py-4 text-[11px] text-muted"
+          style={{ borderTop: "1px solid var(--border)" }}
+        >
+          <span>© {new Date().getFullYear()} AYNAM · Internal CRM · Software for a smarter tomorrow.</span>
+          <a href="https://aynam.in" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
+            aynam.in ↗
+          </a>
+        </footer>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import FadeUp from "@/components/motion/FadeUp";
 import ImageReveal from "@/components/motion/ImageReveal";
 import TransitionLink from "@/components/motion/TransitionLink";
 import CitnBrowserFrame from "@/components/work/CitnBrowserFrame";
-import { CITN, EXPERIMENTS } from "@/lib/constants";
+import { CITN } from "@/lib/constants";
 
 export default function WorkPage() {
   return (
@@ -98,41 +98,6 @@ export default function WorkPage() {
           <span>Additional case studies will be published as client work ships.</span>
           
         </FadeUp>
-      </section>
-
-      {/* ---- Experiments (explicitly not client work) ---- */}
-      <section data-surface="dark" className="s-dark border-t border-linesoft" aria-label="Experiments">
-        <div className="mx-auto w-full max-w-shell px-5 py-24 md:px-8 md:py-28 lg:px-12">
-          <FadeUp>
-            <span className="label-tech text-fog-muted">Experiments — Internal R&amp;D</span>
-          </FadeUp>
-          <div className="mt-5 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <RevealLines
-              lines={["Internal research,", "not client work."]}
-              className="headline text-[clamp(2rem,3.6vw,3rem)] text-fog"
-            />
-            <FadeUp delay={0.1}>
-              <p className="max-w-md text-sm leading-relaxed text-fog-dim">
-                Prototypes and research systems we build in-house to stay sharp. They are
-                not client engagements and are listed here for transparency only.
-              </p>
-            </FadeUp>
-          </div>
-
-          <ul className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {EXPERIMENTS.map((x, i) => (
-              <li key={x.name}>
-                <FadeUp delay={i * 0.06} y={20}>
-                  <div className="rounded-xl border border-line bg-ink-800 p-5 transition-colors duration-500 hover:border-fg/25">
-                    <span className="text-[10px] tracking-tech text-fog-muted">0{i + 1}</span>
-                    <h3 className="mt-3 text-sm font-medium text-fog">{x.name}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-fog-muted">{x.note}</p>
-                  </div>
-                </FadeUp>
-              </li>
-            ))}
-          </ul>
-        </div>
       </section>
 
       <section data-surface="deep" className="s-deep border-t border-linesoft">

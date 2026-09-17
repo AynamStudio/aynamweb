@@ -21,6 +21,7 @@ export function emailConfig() {
     pass: process.env.SMTP_PASSWORD || "",
     contact: process.env.AYNAM_CONTACT_EMAIL || process.env.SMTP_USER || "",
     siteUrl: (process.env.AYNAM_SITE_URL || "").replace(/\/+$/, ""),
+    assetsUrl: (process.env.AYNAM_ASSETS_URL || "").replace(/\/+$/, ""),
     logoUrl: process.env.AYNAM_LOGO_URL || "",
   };
 }
@@ -42,10 +43,11 @@ export function fromAddress(): string {
  * (the banner ships in /public). Empty string → clean text wordmark fallback.
  */
 export function bannerUrl(): string {
-  const { siteUrl, logoUrl } = emailConfig();
+  const { siteUrl, assetsUrl, logoUrl } = emailConfig();
+  const origin = assetsUrl || siteUrl;
   return (
     process.env.AYNAM_EMAIL_BANNER_URL ||
-    (siteUrl ? `${siteUrl}/images/email-banner.png` : "") ||
+    (origin ? `${origin}/images/email-banner.png` : "") ||
     logoUrl
   );
 }

@@ -7,7 +7,13 @@ import { cn } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "success" | "error";
 
-const API = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+/**
+ * Post to the same-origin /api/contact — the frontend Route Handler owns
+ * SMTP delivery (Vercel can reach Gmail outbound) and optionally proxies to
+ * the backend CRM for lead persistence. The browser only talks to its own
+ * origin so there are no CORS/cookie surprises on the marketing site.
+ */
+const CONTACT_ENDPOINT = "/api/contact";
 
 const INITIAL = {
   name: "",
@@ -72,7 +78,7 @@ export default function ContactForm() {
     if (busy) return; // double-click guard
     setStatus("sending");
     try {
-      const res = await fetch(`${API}/api/contact`, {
+      const res = await fetch(CONTACT_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -121,7 +127,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid grid-cols-1 gap-x-10 gap-y-9 md:grid-cols-2">
+    <form onSubmit={onSubmit} noValidate className="relative grid grid-cols-1 gap-x-10 gap-y-9 md:grid-cols-2">
       {/* honeypot — hidden from humans, irresistible to bots */}
       <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
         <label>

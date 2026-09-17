@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { User, type IUser } from "./models/User";
 
 export const COOKIE_NAME = "aynam_sess";
-const secret = () => process.env.SESSION_SECRET || "aynam-dev-session-secret-change-me";
+const secret = () =>
+  process.env.JWT_SECRET || process.env.SESSION_SECRET || "aynam-dev-session-secret-change-me";
 
 export const hashPassword = (plain: string): Promise<string> => bcrypt.hash(plain, 10);
 export const verifyPassword = (plain: string, hash: string): Promise<boolean> => bcrypt.compare(plain, hash);
@@ -22,12 +23,18 @@ export function verifyToken(token: string): { sub: string; email: string } | nul
 }
 
 export function cookieOptions(): Record<string, unknown> {
+  const isProd = process.env.NODE_ENV === "production";
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    // Never send Secure on plain HTTP — browsers won't store the cookie,
+    // which is exactly the "login 200 → next request 401" failure mode.
+    secure: isProd,
     path: "/",
-    domain: process.env.COOKIE_DOMAIN || undefined, // e.g. ".aynam.studio" for subdomain sessions
+    // In production share the session across *.aynam.in (crm/api/www).
+    // In dev leave domain unset (localhost) because browsers reject
+    // cookies on the literal "localhost" domain attribute.
+    domain: isProd && process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN : undefined,
     maxAge: 60 * 60 * 12,
   };
 }

@@ -4,7 +4,7 @@
  * Swap CONTACT_EMAIL once the public inbox exists; mailto links render only when set.
  */
 
-export const CONTACT_EMAIL = ""; // e.g. "hello@aynam.com" once live
+export const CONTACT_EMAIL = "hello@aynam.in"; // public inbox — receives contact form submissions
 
 export const SOCIAL_HANDLE = "@aynam";
 

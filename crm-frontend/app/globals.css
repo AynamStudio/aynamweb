@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* token triplets (rgb) — surfaces re-scope these per section */
+  --ink-950: 7 7 7;
+  --ink-900: 10 10 10;
+  --ink-800: 14 14 14;
+  --card: 10 10 10;
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --fog: 245 245 245;
+  --fog-dim: 154 154 154;
+  --fog-muted: 94 94 94;
+  --fg: 255 255 255;
+  --scrim: 0 0 0;
+  --focus: rgba(255, 255, 255, 0.7);
+  --sel-bg: rgba(255, 255, 255, 0.22);
+  --sel-fg: #ffffff;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-h: 72px;
+  color-scheme: dark;
+}
+
+/* ============================================================
+   SECTION SURFACES — the editorial light/dark rhythm.
+   Each scope re-defines the token triplets so every token-driven
+   utility inside (bg-ink-*, text-fog*, border-line, bg-fg, bg-card…)
+   recolours automatically. Sequence on home:
+   dark hero → light capabilities → soft work (dark CITN panel)
+   → dark industries → light why → deep contact → black footer.
+   ============================================================ */
+.s-dark {
+  background: rgb(var(--ink-950));
+  --ink-950: 7 7 7;
+  --ink-900: 10 10 10;
+  --ink-800: 14 14 14;
+  --card: 10 10 10;
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --fog: 245 245 245;
+  --fog-dim: 154 154 154;
+  --fog-muted: 94 94 94;
+  --fg: 255 255 255;
+  --scrim: 0 0 0;
+  --focus: rgba(255, 255, 255, 0.7);
+  --sel-bg: rgba(255, 255, 255, 0.22);
+  --sel-fg: #ffffff;
+  color-scheme: dark;
+}
+.s-deep {
+  background: rgb(var(--ink-950));
+  --ink-950: 5 5 5;
+  --ink-900: 9 9 9;
+  --ink-800: 13 13 13;
+  --card: 9 9 9;
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --fog: 245 245 245;
+  --fog-dim: 154 154 154;
+  --fog-muted: 94 94 94;
+  --fg: 255 255 255;
+  --scrim: 0 0 0;
+  --focus: rgba(255, 255, 255, 0.7);
+  --sel-bg: rgba(255, 255, 255, 0.22);
+  --sel-fg: #ffffff;
+  color-scheme: dark;
+}
+.s-black {
+  background: rgb(var(--ink-950));
+  --ink-950: 0 0 0;
+  --ink-900: 5 5 5;
+  --ink-800: 10 10 10;
+  --card: 5 5 5;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --fog: 245 245 245;
+  --fog-dim: 154 154 154;
+  --fog-muted: 94 94 94;
+  --fg: 255 255 255;
+  --scrim: 0 0 0;
+  --focus: rgba(255, 255, 255, 0.7);
+  --sel-bg: rgba(255, 255, 255, 0.22);
+  --sel-fg: #ffffff;
+  color-scheme: dark;
+}
+.s-light {
+  background: rgb(var(--ink-950));
+  --ink-950: 245 245 242;
+  --ink-900: 255 255 255;
+  --ink-800: 250 250 248;
+  --card: 255 255 255;
+  --line: rgba(0, 0, 0, 0.12);
+  --line-soft: rgba(0, 0, 0, 0.07);
+  --fog: 10 10 10;
+  --fog-dim: 94 94 94;
+  --fog-muted: 154 154 154;
+  --fg: 10 10 10;
+  --scrim: 245 245 242;
+  --focus: rgba(10, 10, 10, 0.7);
+  --sel-bg: rgba(10, 10, 10, 0.14);
+  --sel-fg: #0a0a0a;
+  color-scheme: light;
+}
+.s-soft {
+  background: rgb(var(--ink-950));
+  --ink-950: 234 234 230;
+  --ink-900: 255 255 255;
+  --ink-800: 248 248 245;
+  --card: 255 255 255;
+  --line: rgba(0, 0, 0, 0.12);
+  --line-soft: rgba(0, 0, 0, 0.07);
+  --fog: 10 10 10;
+  --fog-dim: 94 94 94;
+  --fog-muted: 150 150 150;
+  --fg: 10 10 10;
+  --scrim: 234 234 230;
+  --focus: rgba(10, 10, 10, 0.7);
+  --sel-bg: rgba(10, 10, 10, 0.14);
+  --sel-fg: #0a0a0a;
+  color-scheme: light;
+}
+
+html {
+  background: rgb(var(--ink-950));
+  scroll-behavior: smooth;
+}
+
+body {
+  background: rgb(var(--ink-950));
+  color: rgb(var(--fog));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--sel-bg);
+  color: var(--sel-fg);
+}
+
+:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- Lenis ---------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ---------- Type helpers ---------- */
+.label-tech {
+  font-size: clamp(0.5625rem, 0.5rem + 0.2vw, 0.6875rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.headline {
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  font-weight: 500;
+}
+
+/* Line-mask reveal primitive */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.mask-line > span {
+  display: block;
+  will-change: transform;
+}
+
+/* ---------- Imagery ---------- */
+.mono-img {
+  filter: grayscale(100%) contrast(1.14) brightness(0.82);
+}
+.mono-img-soft {
+  filter: grayscale(100%) contrast(1.08) brightness(0.9);
+}
+.mono-img-hero {
+  filter: grayscale(100%) contrast(1.16) brightness(0.94) saturate(0.6);
+}
+
+/* hero micro-copy steady opacity lives on children so the GSAP
+   fade on the parent stays independent */
+[data-hero="micro"] > * {
+  opacity: 0.55;
+}
+
+/* ---------- Nav logo crossfade ---------- */
+.nav-logo {
+  grid-area: 1 / 1;
+  transition: opacity 0.45s var(--ease-expo);
+}
+.nav-logo--dark {
+  opacity: 0;
+}
+[data-nav="light"] .nav-logo--white {
+  opacity: 0;
+}
+[data-nav="light"] .nav-logo--dark {
+  opacity: 1;
+}
+
+/* ---------- Hero readability scrims (theme-aware) ---------- */
+.hero-scrim-base {
+  background: rgb(var(--scrim) / 0.2);
+}
+.hero-scrim-linear {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--scrim) / 0.94) 0%,
+    rgb(var(--scrim) / 0.8) 26%,
+    rgb(var(--scrim) / 0.44) 50%,
+    rgb(var(--scrim) / 0.1) 72%,
+    rgb(var(--scrim) / 0) 88%
+  );
+}
+.hero-vignette {
+  background: radial-gradient(115% 92% at 50% 42%, transparent 54%, rgb(var(--scrim) / 0.4) 100%);
+}
+
+
+/* ---------- Theme-aware logo lockups ---------- */
+.logo-on-light {
+  display: none;
+}
+
+/* ---------- Frame shadow (theme-aware) ---------- */
+.frame-shadow {
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+}
+
+/* Film grain overlay */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 80;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  animation: grain-shift 1.2s steps(4) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1.5%); }
+  50% { transform: translate(1.5%, -2%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain::after { animation: none; }
+}
+
+/* ---------- Custom cursor ---------- */
+html.cursor-on,
+html.cursor-on a,
+html.cursor-on button,
+html.cursor-on [role="button"] {
+  cursor: none;
+}
+
+/* ---------- Misc ---------- */
+.hairline-t { border-top: 1px solid var(--line-soft); }
+.hairline-b { border-bottom: 1px solid var(--line-soft); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- What We Do: single-viewport fit ---- */
+.cap-section > div > header { margin-bottom: 1.5rem; }
+@media (min-width: 768px) {
+  .cap-section > div > header { margin-bottom: 2.5rem; }
+}
+@media (min-width: 768px) and (max-height: 840px) {
+  .cap-section header .headline { font-size: clamp(2rem, 3.4vw, 3rem); }
+}
